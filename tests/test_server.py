@@ -74,10 +74,15 @@ def test_reassemble(server):
     with server.app.test_client() as client:
         resp = client.get('/', headers={'Range': 'bytes=0-10'})
         assert resp.status_code == 206
+        content_range = resp.headers['Content-Range']
+        assert content_range == 'bytes {}-{}/{}'.format(0, 10, server.dummy_file.size)
         bytes_out = resp.data
 
         resp = client.get('/', headers={'Range': 'bytes=11-100000'})
         assert resp.status_code == 206
+        content_range = resp.headers['Content-Range']
+        assert content_range == 'bytes {}-{}/{}'.format(
+            11, server.dummy_file.size - 1, server.dummy_file.size)
         bytes_out += resp.data
 
         assert bytes_out == server.dummy_file.contents
@@ -110,13 +115,33 @@ def test_if_unmodified_since(server):
         assert resp.status_code == 304
 
 
+def check_unsupported(cmd: str, args: list):
+    cmd_args = [cmd]
+    cmd_args.extend(args)
+    skip = False
+
+    try:
+        subprocess.check_call(cmd_args)
+    except subprocess.CalledProcessError:
+        skip = True
+
+    return pytest.mark.skipif(skip, reason='Command {!r} not supported'.format(cmd))
+
+
+@check_unsupported('curl', ['--version'])
 def test_curl(live_server):
     # Debugbing help from `man curl`, on error 33
     #       33     HTTP range error. The range "command" didn't work.
     subprocess.check_call(['curl', '--continue-at', '10', live_server])
 
 
+@check_unsupported('wget', ['--version'])
 def test_wget(live_server):
     tmp = NamedTemporaryFile()
     tmp.write(b'x' * 10)
     subprocess.check_call(['wget', '--continue', '-O', tmp.name, live_server])
+
+
+@check_unsupported('http', ['--version'])
+def test_httpie(live_server):
+    subprocess.check_call(['http', live_server, 'Range: bytes=10'])

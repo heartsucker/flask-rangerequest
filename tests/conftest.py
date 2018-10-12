@@ -27,6 +27,7 @@ class DummyFile:
         self.full_path = path.join(path.dirname(__file__), '..', 'README.md')
         with open(self.full_path, 'rb') as f:
             self.contents = f.read()
+        self.size = len(self.contents)
 
 
 @pytest.fixture(scope='function')
