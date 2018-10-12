@@ -89,9 +89,14 @@ class RangeRequest:
         else:
             resp = Response()
 
+        if not use_default_range:
+            etag = self.make_etag(BytesIO((self.__etag + str(ranges)).encode('utf-8')))
+        else:
+            etag = self.__etag
+
         resp.headers['Content-Length'] = ranges[0][1] - ranges[0][0]
         resp.headers['Accept-Ranges'] = 'bytes'
-        resp.headers['ETag'] = self.__etag
+        resp.headers['ETag'] = etag
         resp.headers['Last-Modified'] = http_date(self.__last_modified)
 
         if status_code == 206:
