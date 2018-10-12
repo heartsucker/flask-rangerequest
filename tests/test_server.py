@@ -122,7 +122,7 @@ def check_unsupported(cmd: str, args: list):
 
     try:
         subprocess.check_call(cmd_args)
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, FileNotFoundError):
         skip = True
 
     return pytest.mark.skipif(skip, reason='Command {!r} not supported'.format(cmd))
