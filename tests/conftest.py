@@ -15,11 +15,10 @@ class Server:
     def __init__(self) -> None:
         self.app = Flask(__name__)
         self.dummy_file = DummyFile()
-        self.range_request = RangeRequest(self.dummy_file.contents)
 
         @self.app.route('/', methods=('GET', 'POST'))
         def index():
-            return self.range_request.make_response()
+            return RangeRequest(self.dummy_file.contents).make_response()
 
 
 class DummyFile:

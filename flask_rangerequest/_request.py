@@ -6,6 +6,8 @@ from flask import Response, abort, request
 from io import BytesIO
 from werkzeug import parse_date, http_date
 
+from ._utils import parse_range_header
+
 
 class RangeRequest:
 
@@ -57,7 +59,7 @@ class RangeRequest:
         if request.method == 'GET':
             range_header = request.headers.get('Range')
 
-            ranges = self.parse_range_header(range_header, self.__size)
+            ranges = parse_range_header(range_header, self.__size)
             if not (len(ranges) == 1 and ranges[0][0] == 0 and ranges[0][1] == self.__size - 1):
                 use_default_range = False
                 status_code = 206
@@ -83,7 +85,7 @@ class RangeRequest:
         # TODO If-None-Match support
 
         if status_code != 304:
-            resp = Response(self.generate(ranges, self.__data))
+            resp = Response(self.__generate(ranges, self.__data))
         else:
             resp = Response()
 
@@ -100,7 +102,7 @@ class RangeRequest:
 
         return resp
 
-    def generate(self, ranges: list, readable):
+    def __generate(self, ranges: list, readable):
         for (start, end) in ranges:
             readable.seek(start)
             bytes_left = end - start + 1
@@ -112,69 +114,7 @@ class RangeRequest:
                 bytes_left -= read_size
                 yield chunk
 
-    @classmethod
-    def parse_range_header(cls, range_header: str, target_size: int) -> list:
-        end_index = target_size - 1
-        if range_header is None:
-            return [(0, end_index)]
-
-        bytes_ = 'bytes='
-        if not range_header.startswith(bytes_):
-            abort(416)
-
-        ranges = []
-        for range_ in range_header[len(bytes_):].split(','):
-            split = range_.split('-')
-            if len(split) == 1:
-                try:
-                    start = int(split[0])
-                    end = end_index
-                except ValueError:
-                    abort(416)
-            elif len(split) == 2:
-                start, end = split[0], split[1]
-                if not start:
-                    # parse ranges of the form "bytes=-100" (i.e., last 100 bytes)
-                    end = end_index
-                    try:
-                        start = end - int(split[1]) + 1
-                    except ValueError:
-                        abort(416)
-                else:
-                    # parse ranges of the form "bytes=100-200"
-                    try:
-                        start = int(start)
-                        if not end:
-                            end = target_size
-                        else:
-                            end = int(end)
-                    except ValueError:
-                        abort(416)
-
-                    if end < start:
-                        abort(416)
-
-                    end = min(end, end_index)
-            else:
-                abort(416)
-
-            ranges.append((start, end))
-
-        # merge the ranges
-        merged = []
-        ranges = sorted(ranges, key=lambda x: x[0])
-        for range_ in ranges:
-            # initial case
-            if not merged:
-                merged.append(range_)
-            else:
-                # merge ranges that are adjacent or overlapping
-                if range_[0] <= merged[-1][1] + 1:
-                    merged[-1] = (merged[-1][0], max(range_[1], merged[-1][1]))
-                else:
-                    merged.append(range_)
-
-        return merged
+        readable.close()
 
     @classmethod
     def make_etag(cls, data):

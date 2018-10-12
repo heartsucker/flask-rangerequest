@@ -4,7 +4,7 @@ import subprocess
 from tempfile import NamedTemporaryFile
 from werkzeug.exceptions import RequestedRangeNotSatisfiable
 
-from flask_rangerequest import RangeRequest
+from flask_rangerequest._utils import parse_range_header
 
 
 VALID_RANGES = [
@@ -33,12 +33,12 @@ INVALID_RANGES = [
 def test_parse_ranges():
     for case in VALID_RANGES:
         (header, target_size, expected) = case
-        parsed = RangeRequest.parse_range_header(header, target_size)
+        parsed = parse_range_header(header, target_size)
         assert parsed == expected, case
 
     for invalid in INVALID_RANGES:
         with pytest.raises(RequestedRangeNotSatisfiable):
-            RangeRequest.parse_range_header(invalid, 500)
+            parse_range_header(invalid, 500)
 
 
 def test_headers(server):
