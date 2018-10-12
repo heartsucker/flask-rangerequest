@@ -1,4 +1,5 @@
 # Flask-RangeRequest
+[![PyPI Version](https://badge.fury.io/py/Flask-RangeRequest.svg)](https://pypi.python.org/pypi/Flask-RangeRequest) [![CI](https://api.travis-ci.org/heartsucker/flask-rangerequest.svg?branch=develop)](https://api.travis-ci.org/heartsucker/flask-rangerequest.svg?branch=develop) [![Documentation Status](https://readthedocs.org/projects/flask-rangerequest/badge/?version=latest)](https://flask-rangerequest.readthedocs.io/en/latest/?badge=latest)
 
 `Flask-RangeRequest` adds range request ([RFC 7233](https://tools.ietf.org/html/rfc7233)) support to your Flask app.
 
