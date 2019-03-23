@@ -13,9 +13,9 @@ class RangeRequest:
 
     def __init__(self,
                  data,
-                 etag: str=None,
-                 last_modified: datetime=None,
-                 size=None) -> None:
+                 etag: str = None,
+                 last_modified: datetime = None,
+                 size: int = None) -> None:
 
         if not ((etag is None and last_modified is None and size is None) or
                 (etag is not None and last_modified is not None and size is not None)):
