@@ -4,7 +4,12 @@ import hashlib
 from datetime import datetime
 from flask import Response, abort, request
 from io import BytesIO
-from werkzeug import parse_date, http_date
+try:
+    # version >= 1.0
+    from werkzeug.http import parse_date, http_date
+except ImportError:
+    # version <1.0
+    from werkzeug import parse_date, http_date
 
 from ._utils import parse_range_header
 
