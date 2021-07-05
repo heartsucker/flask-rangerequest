@@ -99,7 +99,7 @@ class RangeRequest:
         else:
             etag = self.__etag
 
-        resp.headers['Content-Length'] = ranges[0][1] - ranges[0][0]
+        resp.headers['Content-Length'] = ranges[0][1] - ranges[0][0] + 1
         resp.headers['Accept-Ranges'] = 'bytes'
         resp.headers['ETag'] = etag
         resp.headers['Last-Modified'] = http_date(self.__last_modified)
