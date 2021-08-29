@@ -1,7 +1,7 @@
 import binascii
 import hashlib
 
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import Response, abort, request
 from io import BytesIO
 try:
@@ -42,7 +42,7 @@ class RangeRequest:
         if last_modified is not None:
             self.__last_modified = last_modified
         else:
-            self.__last_modified = datetime.utcnow()
+            self.__last_modified = datetime.now(timezone.utc)
 
         if size is not None:
             self.__size = size

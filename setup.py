@@ -29,7 +29,7 @@ setuptools.setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Flask',
+        'Flask>=2',
     ],
     python_requires='>=3.6',
     classifiers=(
